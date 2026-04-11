@@ -1,0 +1,62 @@
+{% extends 'base.html' %} {% block title %}用户登录 - 校园生活圈{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-5 col-md-7">
+    <div class="card card-elevated auth-card">
+      <div class="auth-header text-center">
+        <h3 class="fw-bold mb-1">用户登录</h3>
+        <p class="helper-text mb-3">欢迎回来，使用学号快速进入校园生活圈</p>
+      </div>
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endif %}
+      <form method="post" id="loginForm">
+        <div class="mb-3">
+          <label for="student_id" class="form-label">学号</label>
+          <input
+            type="text"
+            class="form-control"
+            id="student_id"
+            name="student_id"
+            placeholder="输入学号"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">密码</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="输入密码"
+            required
+          />
+        </div>
+        <div class="d-grid mb-2">
+          <button type="submit" class="btn btn-primary w-100" id="loginBtn">
+            <span class="btn-text">登录</span>
+            <span
+              class="spinner-border spinner-border-sm ms-2"
+              role="status"
+              style="display: none"
+            ></span>
+          </button>
+        </div>
+      </form>
+      <div class="text-center mt-3 helper-text">
+        还没有账号？
+        <a href="{{ url_for('front.register') }}">前往注册</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById("loginForm").addEventListener("submit", function () {
+    const btn = document.getElementById("loginBtn");
+    btn.querySelector(".btn-text").textContent = "登录中...";
+    btn.querySelector(".spinner-border").style.display = "inline-block";
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}

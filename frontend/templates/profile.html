@@ -1,0 +1,59 @@
+{% extends 'base.html' %} {% block title %}个人中心 - 校园生活圈{% endblock %}
+{% block content %}
+<div class="content-limit mx-auto">
+  <div
+    class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3"
+  >
+    <div>
+      <h4 class="section-title mb-1">个人中心</h4>
+      <div class="muted">查看账号信息，快速跳转到站内功能</div>
+    </div>
+  </div>
+
+  <div class="card card-elevated">
+    <div class="card-body">
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <div class="mb-2">
+            <div class="muted">用户名</div>
+            <div class="fs-5 fw-semibold mt-1">{{ user.username }}</div>
+          </div>
+        </div>
+        {% if user.user_id %}
+        <div class="col-md-6">
+          <div class="mb-2">
+            <div class="muted">用户ID</div>
+            <div class="fs-6 fw-semibold mt-1">{{ user.user_id }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="{{ url_for('front.my_posts') }}" class="btn btn-primary"
+          >我的发布</a
+        >
+        <a
+          href="{{ url_for('front.trades_list') }}"
+          class="btn btn-outline-secondary"
+          >二手市场</a
+        >
+        <a
+          href="{{ url_for('front.lostfound_list') }}"
+          class="btn btn-outline-secondary"
+          >失物招领</a
+        >
+        <a
+          href="{{ url_for('front.messages_inbox') }}"
+          class="btn btn-outline-secondary"
+          >我的消息</a
+        >
+        <a
+          href="{{ url_for('front.logout') }}"
+          class="btn btn-secondary ms-auto"
+          >退出登录</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

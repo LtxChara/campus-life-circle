@@ -1,0 +1,212 @@
+<!-- 3.0版本站内信界面 -->
+{% extends 'base.html' %} {% block title %}我的消息 - 校园生活圈{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">站内信箱</h3>
+  <span class="badge bg-primary rounded-pill"
+    >{{ messages|length }} 条消息</span
+  >
+</div>
+
+{% if messages %}
+<div class="message-center">
+  {% for msg in messages %}
+  <div id="msg-card-{{ msg.id }}" class="msg-card">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-info text-dark">来自: {{ msg.sender_name }}</span>
+      </div>
+      <small class="msg-meta">{{ msg.created_at }}</small>
+    </div>
+
+    <p class="mb-2 mt-1 fs-6">{{ msg.content }}</p>
+    <div class="d-flex justify-content-between align-items-center">
+      {% if msg.post_id %}
+      <small>
+        关联:
+        <a
+          href="{{ url_for('front.lostfound_detail', post_id=msg.post_id) }}"
+          class="fw-bold text-decoration-none"
+        >
+          {{ msg.post_title }} 🔗
+        </a>
+      </small>
+      {% elif msg.item_id %}
+      <small>
+        关联:
+        <a
+          href="{{ url_for('front.trades_detail', item_id=msg.item_id) }}"
+          class="fw-bold text-decoration-none"
+        >
+          {{ msg.post_title }} 🔗
+        </a>
+      </small>
+      {% else %}
+      <small class="msg-meta">普通私信</small>
+      {% endif %}
+
+      <div class="msg-actions">
+        <button
+          class="icon-btn"
+          onclick="openReplyModal({{ msg.sender_id }}, '{{ msg.sender_name }}', {{ msg.post_id or 'null' }}, {{ msg.item_id or 'null' }})"
+        >
+          ↩ 回复
+        </button>
+        <button class="icon-btn" onclick="deleteMessage({{ msg.id }})">
+          🗑 删除
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<!-- 默认无信件界面 -->
+<div class="empty-state">
+  <div class="empty-illustration">📮</div>
+  <h5 class="text-muted mb-1">信箱空空如也</h5>
+  <p class="mb-3">去集市逛逛，或看看失物招领吧</p>
+  <a href="{{ url_for('front.index') }}" class="btn btn-primary">去首页逛逛</a>
+</div>
+{% endif %}
+
+<!-- 回复消息界面 -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          回复给 <span id="replyToName" class="text-primary"></span>
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="replyForm">
+          <input type="hidden" id="replyReceiverId" />
+          <input type="hidden" id="replyPostId" />
+          <input type="hidden" id="replyItemId" />
+
+          <div class="mb-3">
+            <textarea
+              class="form-control"
+              id="replyContent"
+              rows="3"
+              placeholder="写下你的回复..."
+              required
+            ></textarea>
+          </div>
+          <div id="replyAlert" class="alert d-none"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          取消
+        </button>
+        <button type="button" class="btn btn-primary" id="btnSendReply">
+          发送回复
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 删除与关联页面读取 -->
+<script>
+  // 删除消息逻辑
+  function deleteMessage(msgId) {
+    if (!confirm("确定要删除这条消息吗？删除后无法恢复哦！")) {
+      return;
+    }
+    fetch(`/api/message/${msgId}/delete`, { method: "DELETE" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const card = document.getElementById(`msg-card-${msgId}`);
+          if (card) {
+            card.style.transition = "all 0.5s";
+            card.style.opacity = "0";
+            setTimeout(() => card.remove(), 500);
+          }
+        } else {
+          alert(data.message || "删除失败");
+        }
+      })
+      .catch((err) => alert("网络错误"));
+  }
+
+  // 打开回复弹窗
+  function openReplyModal(senderId, senderName, postId, itemId) {
+    document.getElementById("replyReceiverId").value = senderId;
+    document.getElementById("replyToName").innerText = senderName;
+
+    // 设置两个ID，如果没有则设为空
+    document.getElementById("replyPostId").value = postId || ""; // 设置 PostID
+    document.getElementById("replyItemId").value = itemId || ""; // 设置 ItemID
+
+    document.getElementById("replyContent").value = "";
+    document.getElementById("replyAlert").classList.add("d-none");
+
+    var myModal = new bootstrap.Modal(document.getElementById("replyModal"));
+    myModal.show();
+  }
+
+  // 发送回复
+  document
+    .getElementById("btnSendReply")
+    .addEventListener("click", function () {
+      const content = document.getElementById("replyContent").value;
+      const receiverId = document.getElementById("replyReceiverId").value;
+      const postId = document.getElementById("replyPostId").value; // PostID
+      const itemId = document.getElementById("replyItemId").value; // ItemID
+      const btn = this;
+
+      if (!content.trim()) {
+        alert("请输入回复内容");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "发送中...";
+
+      fetch("/api/message/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiver_id: receiverId,
+          content: content,
+          // 把两个ID都传给后端，后端会自动处理
+          post_id: postId ? parseInt(postId) : null,
+          item_id: itemId ? parseInt(itemId) : null,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const alertBox = document.getElementById("replyAlert");
+          alertBox.classList.remove("d-none", "alert-success", "alert-danger");
+
+          if (data.success) {
+            alertBox.classList.add("alert-success");
+            alertBox.innerText = "回复成功！";
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            alertBox.classList.add("alert-danger");
+            alertBox.innerText = data.message || "发送失败";
+            btn.disabled = false;
+            btn.innerText = "发送回复";
+          }
+          alertBox.classList.remove("d-none");
+        })
+        .catch((err) => {
+          alert("网络错误");
+          btn.disabled = false;
+          btn.innerText = "发送回复";
+        });
+    });
+</script>
+{% endblock %}

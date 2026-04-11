@@ -1,0 +1,63 @@
+{% extends 'base.html' %} {% block title %}二手市场 - 校园生活圈{% endblock %}
+{% block content %}
+<div
+  class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2"
+>
+  <div>
+    <h4 class="mb-1">二手交易</h4>
+    <div class="muted">浏览校园好物，支持站内私信联系卖家</div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('front.trades_new') }}"
+    >发布商品</a
+  >
+</div>
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %} {% if items and items|length > 0 %}
+<div class="card-grid">
+  {% for item in items %} {% set cover = item.image if item.image else None %}
+  <a
+    href="{{ url_for('front.trades_detail', item_id=item.id) }}"
+    class="goods-card d-block"
+  >
+    {% if cover %}
+    <img
+      src="{{ get_image_url(cover, 'goods') }}"
+      class="card-img-top goods-cover"
+      alt="商品图片"
+      onerror="this.src = 'https://via.placeholder.com/600x400?text=二手商品'"
+    />
+    {% else %}
+    <div
+      class="goods-cover d-flex align-items-center justify-content-center text-muted"
+      style="background: linear-gradient(135deg, #e0f2fe, #f0f9ff)"
+    >
+      <span class="badge-pill-soft" style="font-size: 0.9rem; color: #4338ca"
+        >二手</span
+      >
+    </div>
+    {% endif %}
+    <div class="goods-body">
+      <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="goods-title text-truncate">{{ item.title }}</div>
+        <span class="goods-price">¥{{ item.price }}</span>
+      </div>
+      <p class="goods-meta text-truncate mb-1">{{ item.description }}</p>
+      {% if item.created_at %}
+      <small class="goods-meta">{{ item.created_at }}</small>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👜</div>
+  <div>暂无二手商品信息，去发布一个吧～</div>
+  <div class="mt-3">
+    <a class="btn btn-primary" href="{{ url_for('front.trades_new') }}"
+      >立即发布</a
+    >
+  </div>
+</div>
+{% endif %} {% endblock %}

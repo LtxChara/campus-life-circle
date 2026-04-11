@@ -1,0 +1,142 @@
+{% extends 'base.html' %} {% block title %}我的发布 - 校园生活圈{% endblock %}
+{% block content %}
+<div
+  class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2"
+>
+  <div>
+    <h4 class="mb-1">我的发布</h4>
+    <div class="muted">查看我发布的二手商品和失物招领信息</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a
+      class="btn btn-outline-secondary btn-sm"
+      href="{{ url_for('front.trades_new') }}"
+      >发布商品</a
+    >
+    <a
+      class="btn btn-outline-success btn-sm"
+      href="{{ url_for('front.lostfound_new') }}"
+      >发布失物招领</a
+    >
+  </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<!-- 二手商品 -->
+<div class="mb-4">
+  <h5 class="mb-3">二手商品</h5>
+  {% if items and items|length > 0 %}
+  <div class="card-grid">
+    {% for item in items %} {% set is_closed = (item.status in ['已售',
+    '已下架']) %}
+    <a
+      href="{{ url_for('front.trades_detail', item_id=item.id) }}"
+      class="goods-card d-block {% if is_closed %}card-dimmed{% endif %}"
+    >
+      {% if item.image %}
+      <img
+        src="{{ get_image_url(item.image, 'goods') }}"
+        class="card-img-top goods-cover"
+        alt="商品图片"
+        onerror="this.src = 'https://via.placeholder.com/600x400?text=二手商品'"
+      />
+      {% else %}
+      <div
+        class="goods-cover d-flex align-items-center justify-content-center text-muted"
+      >
+        <span
+          class="badge-pill-soft position-absolute m-2"
+          style="font-size: 0.9rem; color: #4338ca"
+          >二手</span
+        >
+      </div>
+      {% endif %}
+      <div class="goods-body">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="goods-title text-truncate">{{ item.title }}</div>
+          <span class="goods-price">¥{{ item.price }}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span
+            class="status-badge {% if is_closed %}status-done{% else %}bg-secondary text-white{% endif %}"
+            >{{ item.status }}</span
+          >
+          <small class="goods-meta">{{ item.created_at }}</small>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">👜</div>
+    <div>暂无发布的二手商品</div>
+    <div class="mt-3">
+      <a class="btn btn-primary" href="{{ url_for('front.trades_new') }}"
+        >发布商品</a
+      >
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- 失物招领 -->
+<div>
+  <h5 class="mb-3">失物招领</h5>
+  {% if posts and posts|length > 0 %}
+  <div class="lost-grid">
+    {% for post in posts %} {% set is_lost = (post.type == 'LOST' or
+    post.type|lower == 'lost') %} {% set is_closed = (post.status in ['已找回',
+    '已认领']) %}
+    <a
+      href="{{ url_for('front.lostfound_detail', post_id=post.id) }}"
+      class="lost-card d-block {% if is_closed %}card-dimmed{% endif %}"
+    >
+      <div
+        class="accent {% if is_lost %}accent-lost{% else %}accent-found{% endif %}"
+      ></div>
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="tag-bar">
+          {% if is_lost %}
+          <span class="status-badge status-lost">失物</span>
+          {% else %}
+          <span class="status-badge status-found">招领</span>
+          {% endif %}
+          <small class="muted">{{ post.created_at }}</small>
+        </div>
+        <span
+          class="status-badge {% if is_closed %}status-done{% else %}bg-secondary text-white{% endif %}"
+        >
+          {{ post.status }}
+        </span>
+      </div>
+      {% if post.image %}
+      <img
+        src="{{ get_image_url(post.image, 'lost') }}"
+        alt="现场图片"
+        class="lost-cover mb-2"
+        onerror="this.src = 'https://via.placeholder.com/600x400?text=失物招领'"
+      />
+      {% endif %}
+      <div class="goods-title text-truncate mb-1">{{ post.title }}</div>
+      <p class="goods-meta text-truncate mb-1">{{ post.description }}</p>
+      <div class="goods-meta">地点：{{ post.location }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <div>暂无发布的失物招领信息</div>
+    <div class="mt-3">
+      <a class="btn btn-success" href="{{ url_for('front.lostfound_new') }}"
+        >发布信息</a
+      >
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

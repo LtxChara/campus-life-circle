@@ -1,0 +1,145 @@
+<!-- 在2.0版本的基础上,新增：图片上传功能 -->
+{% extends 'base.html' %} {% block title %}发布二手商品{% endblock %}
+
+<!-- 发布信息（包含基础信息与图片） -->
+{% block content %}
+<h4 class="mb-3">发布二手商品</h4>
+
+<form id="tradeForm">
+  <div class="form-section mb-3">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label">商品标题 *</label>
+        <input
+          type="text"
+          class="form-control"
+          name="title"
+          required
+          placeholder="例如：九成新 iPad Air 64G"
+        />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">价格 (元) *</label>
+        <input
+          type="number"
+          step="0.01"
+          class="form-control"
+          name="price"
+          required
+          placeholder="请输入价格"
+        />
+      </div>
+      <div class="col-12">
+        <label class="form-label">商品描述</label>
+        <textarea
+          class="form-control"
+          name="description"
+          rows="3"
+          placeholder="补充使用情况、成色、面交地点等信息"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section mb-3">
+    <label class="form-label">上传图片</label>
+    <label class="upload-dropzone w-100" for="imageInput">
+      <div class="fw-semibold mb-1">拖拽图片到此处，或点击选择</div>
+      <div class="muted">支持 jpg / png / gif，建议 2MB 内，清晰展示物品</div>
+      <input id="imageInput" type="file" name="image" accept="image/*" />
+    </label>
+    <div id="uploadPreview" class="upload-preview d-none"></div>
+  </div>
+
+  <div id="msgBox" class="alert d-none"></div>
+  <button type="submit" class="btn btn-primary" id="submitBtn">发布商品</button>
+</form>
+
+<!-- 图片上传功能：文件检查 -->
+<script>
+  // 文件格式检查逻辑 + 预览
+  (function () {
+    const fileInput = document.querySelector('input[name="image"]');
+    const previewBox = document.getElementById("uploadPreview");
+
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      previewBox.classList.add("d-none");
+      previewBox.innerHTML = "";
+
+      if (file) {
+        const fileName = file.name.toLowerCase();
+        // 允许的后缀名
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+
+        // 检查是否以合法后缀结尾
+        const isValid = allowedExtensions.some((ext) => fileName.endsWith(ext));
+
+        if (!isValid) {
+          toast.warning("格式不支持！目前只支持 JPG, PNG, GIF 图片");
+          this.value = ""; // 清空选中的文件
+          return;
+        }
+
+        const info = document.createElement("div");
+        info.textContent = file.name;
+        previewBox.appendChild(info);
+
+        // 尝试生成缩略图
+        if (file.type.startsWith("image/")) {
+          const img = document.createElement("img");
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            img.src = e.target.result;
+            previewBox.prepend(img);
+          };
+          reader.readAsDataURL(file);
+        }
+
+        previewBox.classList.remove("d-none");
+      }
+    });
+  })();
+
+  // 表单提交逻辑
+  document.getElementById("tradeForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("submitBtn");
+    const msgBox = document.getElementById("msgBox");
+    const formData = new FormData(this); // 自动打包所有输入框和文件
+
+    btn.disabled = true;
+    btn.innerText = "正在发布...";
+
+    // 注意：使用 FormData 时，不要设置 Content-Type header，浏览器会自动设置
+    fetch("/api/secondhand/new", {
+      // 这里的URL要对应 views.py 里的代理
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        msgBox.classList.remove("d-none", "alert-success", "alert-danger");
+        if (data.success) {
+          msgBox.classList.add("alert-success");
+          msgBox.innerText = "发布成功！跳转中...";
+          setTimeout(() => {
+            window.location.href = "{{ url_for('front.trades_list') }}";
+          }, 1000);
+        } else {
+          msgBox.classList.add("alert-danger");
+          msgBox.innerText = data.message || "发布失败";
+          btn.disabled = false;
+          btn.innerText = "发布商品";
+        }
+        msgBox.classList.remove("d-none");
+      })
+      .catch((err) => {
+        toast.error("网络错误");
+        btn.disabled = false;
+        btn.innerText = "发布商品";
+      });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %} {% block title %}用户注册 - 校园生活圈{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-md-8 col-sm-10">
+    <div class="card card-elevated auth-card">
+      <div class="auth-header text-center">
+        <h3 class="fw-bold mb-1">用户注册</h3>
+        <p class="helper-text mb-3">
+          创建校园生活圈账号，开启二手交易与失物招领
+        </p>
+      </div>
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endif %}
+      <form method="post" id="registerForm">
+        <div class="mb-3">
+          <label for="username" class="form-label">用户名</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="请输入用户名"
+            value="{{ username or '' }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="student_id" class="form-label">学号</label>
+          <input
+            type="text"
+            class="form-control"
+            id="student_id"
+            name="student_id"
+            placeholder="请输入学号"
+            value="{{ student_id or '' }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">邮箱</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="请输入邮箱"
+            value="{{ email or '' }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">密码</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="请输入密码"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="confirm_password" class="form-label">确认密码</label>
+          <input
+            type="password"
+            class="form-control"
+            id="confirm_password"
+            name="confirm_password"
+            placeholder="再次输入密码"
+            required
+          />
+        </div>
+        <div class="d-grid mb-2">
+          <button type="submit" class="btn btn-success w-100" id="registerBtn">
+            <span class="btn-text">注册</span>
+            <span
+              class="spinner-border spinner-border-sm ms-2"
+              role="status"
+              style="display: none"
+            ></span>
+          </button>
+        </div>
+      </form>
+      <div class="text-center mt-3 helper-text">
+        已有账号？<a href="{{ url_for('front.login') }}">返回登录</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", function (e) {
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+
+      if (password !== confirmPassword) {
+        e.preventDefault();
+        toast.error("两次输入的密码不一致");
+        return;
+      }
+
+      const btn = document.getElementById("registerBtn");
+      btn.querySelector(".btn-text").textContent = "注册中...";
+      btn.querySelector(".spinner-border").style.display = "inline-block";
+      btn.disabled = true;
+    });
+</script>
+{% endblock %}

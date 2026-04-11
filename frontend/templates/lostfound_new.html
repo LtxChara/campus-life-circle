@@ -1,0 +1,198 @@
+<!-- 在2.0版本的基础上,新增：图片上传功能 -->
+{% extends 'base.html' %} {% block title %}发布失物招领 - 校园生活圈{% endblock
+%}
+
+<!-- 发布信息（包含基础信息与图片） -->
+{% block content %}
+<h4 class="mb-4">发布失物招领信息</h4>
+
+<div id="msgBox" class="alert d-none"></div>
+
+<form id="lostForm">
+  <div class="form-section mb-3">
+    <div class="mb-3">
+      <label for="title" class="form-label">标题 *</label>
+      <input
+        type="text"
+        class="form-control"
+        id="title"
+        name="title"
+        required
+        placeholder="例如：丢失一把黑色雨伞，带有银色把手"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">描述</label>
+      <textarea
+        class="form-control"
+        id="description"
+        name="description"
+        rows="3"
+        placeholder="描述物品特征、时间、更多细节，便于识别"
+      ></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="location" class="form-label">地点 *</label>
+      <input
+        type="text"
+        class="form-control"
+        id="location"
+        name="location"
+        placeholder="请输入丢失或拾取地点"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="contact" class="form-label">联系方式 *</label>
+      <input
+        type="text"
+        class="form-control"
+        id="contact"
+        name="contact"
+        placeholder="请输入联系方式（微信/QQ/电话）"
+        required
+      />
+    </div>
+  </div>
+
+  <div class="form-section mb-3">
+    <label class="form-label">上传图片</label>
+    <label class="upload-dropzone w-100" for="imageInput">
+      <div class="fw-semibold mb-1">拖拽图片到此处，或点击选择</div>
+      <div class="muted">支持 jpg / png / gif，建议 2MB 内，清晰展示物品</div>
+      <input id="imageInput" type="file" name="image" accept="image/*" />
+    </label>
+    <div id="uploadPreview" class="upload-preview d-none"></div>
+  </div>
+
+  <div class="form-section mb-3">
+    <label class="form-label">类型 *</label>
+    <div class="type-toggle mt-2">
+      <label class="type-card lost selected" for="lostRadio">
+        <input type="radio" name="type" id="lostRadio" value="LOST" checked />
+        <div class="icon">丢</div>
+        <div>
+          <div class="fw-bold mb-1">我丢失了物品（失物）</div>
+          <p class="desc">尽量填写时间、地点、特征，方便好心人帮你寻找</p>
+        </div>
+      </label>
+      <label class="type-card found" for="foundRadio">
+        <input type="radio" name="type" id="foundRadio" value="FOUND" />
+        <div class="icon">拾</div>
+        <div>
+          <div class="fw-bold mb-1">我捡到了物品（招领）</div>
+          <p class="desc">说明拾取时间、地点和物品特征，方便失主认领</p>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-success" id="submitBtn">提交发布</button>
+  <a href="{{ url_for('front.lostfound_list') }}" class="btn btn-secondary ms-2"
+    >取消</a
+  >
+</form>
+
+<!-- 图片上传功能：文件检查 + 预览 -->
+<script>
+  // 文件格式检查逻辑 + 预览
+  (function () {
+    const fileInput = document.querySelector('input[name="image"]');
+    const previewBox = document.getElementById("uploadPreview");
+
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      previewBox.classList.add("d-none");
+      previewBox.innerHTML = "";
+
+      if (file) {
+        const fileName = file.name.toLowerCase();
+        // 允许的后缀名
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+
+        // 检查是否以合法后缀结尾
+        const isValid = allowedExtensions.some((ext) => fileName.endsWith(ext));
+
+        if (!isValid) {
+          toast.warning("格式不支持！目前只支持 JPG, PNG, GIF 图片");
+          this.value = ""; // 清空选中的文件
+          return;
+        }
+
+        const info = document.createElement("div");
+        info.textContent = file.name;
+        previewBox.appendChild(info);
+
+        // 尝试生成缩略图
+        if (file.type.startsWith("image/")) {
+          const img = document.createElement("img");
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            img.src = e.target.result;
+            previewBox.prepend(img);
+          };
+          reader.readAsDataURL(file);
+        }
+
+        previewBox.classList.remove("d-none");
+      }
+    });
+  })();
+
+  // 类型选择卡片交互
+  const typeCards = document.querySelectorAll(".type-card");
+  typeCards.forEach((card) => {
+    card.addEventListener("click", () => {
+      typeCards.forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+      const input = card.querySelector('input[type="radio"]');
+      if (input) input.checked = true;
+    });
+  });
+
+  // 表单提交逻辑
+  document.getElementById("lostForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // 阻止默认提交
+
+    const btn = document.getElementById("submitBtn");
+    const msgBox = document.getElementById("msgBox");
+    const formData = new FormData(this); // 自动打包所有字段和文件
+
+    btn.disabled = true;
+    btn.innerText = "正在提交...";
+
+    // 发送给前端代理接口
+    fetch("/api/lostfound/new", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        msgBox.classList.remove("d-none", "alert-success", "alert-danger");
+        if (data.success) {
+          msgBox.classList.add("alert-success");
+          msgBox.innerText = "发布成功！跳转中...";
+          setTimeout(() => {
+            window.location.href = "{{ url_for('front.lostfound_list') }}";
+          }, 1000);
+        } else {
+          msgBox.classList.add("alert-danger");
+          msgBox.innerText = data.message || "发布失败";
+          btn.disabled = false;
+          btn.innerText = "提交发布";
+        }
+        msgBox.classList.remove("d-none");
+        // 滚动到顶部显示消息
+        window.scrollTo(0, 0);
+      })
+      .catch((err) => {
+        toast.error("网络错误，请稍后再试");
+        btn.disabled = false;
+        btn.innerText = "提交发布";
+      });
+  });
+</script>
+{% endblock %}

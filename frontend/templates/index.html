@@ -1,0 +1,274 @@
+{% extends 'base.html' %} {% block title %}首页 - 校园生活圈{% endblock %} {%
+block content %}
+<div class="hero-spotlight mb-4">
+  <div
+    class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"
+  >
+    <div>
+      <h1 class="display-5 mb-2">发现校园好物 · 失物速递</h1>
+      <p class="lead mb-0 text-muted">一键搜索，或者随机探索最新上架</p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if username %}
+      <a class="btn btn-primary" href="{{ url_for('front.trades_list') }}"
+        >逛二手市场</a
+      >
+      <a
+        class="btn btn-outline-secondary"
+        href="{{ url_for('front.lostfound_list') }}"
+        >看看失物招领</a
+      >
+      {% else %}
+      <a class="btn btn-primary" href="{{ url_for('front.login') }}">登录</a>
+      <a class="btn btn-success" href="{{ url_for('front.register') }}">注册</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if username %}
+<!-- 搜索与浏览 -->
+<div class="search-panel mb-3">
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+    <div>
+      <h5 class="mb-1">搜索与浏览</h5>
+      <div class="helper-text">输入关键词，或直接随机探索</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a
+        class="btn btn-outline-secondary btn-sm"
+        href="{{ url_for('front.trades_new') }}"
+        >发布二手商品</a
+      >
+      <a
+        class="btn btn-outline-success btn-sm"
+        href="{{ url_for('front.lostfound_new') }}"
+        >发布失物招领</a
+      >
+    </div>
+  </div>
+  <form id="searchForm" class="mb-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg-7 col-md-7 col-sm-12">
+        <div class="search-input">
+          <span class="input-icon"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            id="searchKeyword"
+            name="keyword"
+            placeholder="输入关键字搜索..."
+          />
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-3 col-sm-6">
+        <button class="btn btn-primary w-100" type="submit">搜索</button>
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-6">
+        <button
+          class="btn btn-outline-secondary w-100"
+          type="button"
+          id="randomBtn"
+        >
+          随机探索
+        </button>
+      </div>
+    </div>
+  </form>
+  <div class="mb-2">
+    <div class="helper-text mb-1">显示内容类型</div>
+    <div class="filter-pills">
+      <div class="filter-pill">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="typeSecondhand"
+          value="secondhand"
+          checked
+        />
+        <label for="typeSecondhand">二手商品</label>
+      </div>
+      <div class="filter-pill">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="typeLost"
+          value="lost"
+          checked
+        />
+        <label for="typeLost">失物</label>
+      </div>
+      <div class="filter-pill">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="typeFound"
+          value="found"
+          checked
+        />
+        <label for="typeFound">招领</label>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <small class="text-muted" id="resultInfo">显示全部内容</small>
+  </div>
+</div>
+
+<!-- 结果显示区域 -->
+<div id="resultsContainer">
+  <div class="empty-state">
+    <div class="empty-icon">🧭</div>
+    <div>使用搜索或点击“随机探索”开始浏览内容</div>
+  </div>
+</div>
+
+<script>
+  // 获取选中的类型
+  function getSelectedTypes() {
+    const types = [];
+    if (document.getElementById("typeSecondhand").checked)
+      types.push("secondhand");
+    if (document.getElementById("typeLost").checked) types.push("lost");
+    if (document.getElementById("typeFound").checked) types.push("found");
+    return types.join(",");
+  }
+
+  // 搜索功能
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const keyword = document.getElementById("searchKeyword").value.trim();
+      const types = getSelectedTypes();
+
+      if (!types) {
+        toast.warning("请至少选择一种内容类型");
+        return;
+      }
+
+      fetch(`/api/search?keyword=${encodeURIComponent(keyword)}&types=${types}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            displayResults(data.items, keyword);
+            document.getElementById("resultInfo").textContent =
+              `找到 ${data.total} 条结果${keyword ? "（关键字: " + keyword + "）" : ""}`;
+          } else {
+            toast.error("搜索失败");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("搜索出错，请检查网络连接");
+        });
+    });
+
+  // 随机刷新功能
+  document.getElementById("randomBtn").addEventListener("click", function () {
+    const types = getSelectedTypes();
+
+    if (!types) {
+      toast.warning("请至少选择一种内容类型");
+      return;
+    }
+
+    fetch(`/api/random?types=${types}&count=20`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          displayResults(data.items, null);
+          document.getElementById("resultInfo").textContent =
+            `随机显示 ${data.count} 条内容`;
+        } else {
+          toast.error("刷新失败");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("刷新出错，请检查网络连接");
+      });
+  });
+
+  // 显示结果
+  function displayResults(items, keyword) {
+    const container = document.getElementById("resultsContainer");
+
+    if (!items || items.length === 0) {
+      container.innerHTML =
+        '<div class="empty-state"><div class="empty-icon">🔍</div><div>没有找到相关内容</div></div>';
+      return;
+    }
+
+    let html = '<div class="card-grid">';
+
+    items.forEach((item) => {
+      const cover = getImageUrl(
+        item.image,
+        item.type === "secondhand" ? "goods" : "lost",
+      );
+      const time = item.created_at_str || "";
+      if (item.type === "secondhand") {
+        html += `
+        <a href="/trades/${item.id}" class="goods-card d-block">
+          <div class="position-relative">
+            ${
+              item.image
+                ? `<img src="${cover}" class="card-img-top goods-cover" alt="cover" onerror="handleImageError(this, 'goods')">`
+                : `<div class="goods-cover d-flex align-items-center justify-content-center text-muted">
+                  <span class="badge-pill-soft position-absolute m-2" style="font-size:0.9rem;color:#4338ca;">二手</span>
+                 </div>`
+            }
+          </div>
+          <div class="goods-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div class="goods-title text-truncate">${escapeHtml(item.title)}</div>
+              <span class="goods-price">¥${item.price}</span>
+            </div>
+            <p class="goods-meta text-truncate mb-0">${escapeHtml(item.description || "")}</p>
+            <small class="goods-meta">${time}</small>
+          </div>
+        </a>
+      `;
+      } else if (item.type === "lostfound") {
+        const badgeClass =
+          item.lostfound_type === "LOST"
+            ? "bg-warning text-dark"
+            : "bg-success";
+        const typeName = item.lostfound_type === "LOST" ? "失物" : "招领";
+        html += `
+        <a href="/lostfound/${item.id}" class="goods-card d-block">
+          <div class="goods-cover d-flex align-items-center justify-content-center text-muted" style="background: linear-gradient(135deg, #fff4e5, #fdf2f8);">
+            <div class="badge ${badgeClass}">${typeName}</div>
+          </div>
+          <div class="goods-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <span class="badge bg-secondary text-white">${escapeHtml(item.status)}</span>
+              <small class="goods-meta">${time}</small>
+            </div>
+            <div class="goods-title text-truncate">${escapeHtml(item.title)}</div>
+            <p class="goods-meta text-truncate mb-1">${escapeHtml(item.description || "")}</p>
+            <small class="goods-meta">地点: ${escapeHtml(item.location || "")}</small>
+          </div>
+        </a>
+      `;
+      }
+    });
+
+    html += "</div>";
+    container.innerHTML = html;
+  }
+
+  // HTML转义函数
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text || "";
+    return div.innerHTML;
+  }
+
+  // 页面加载时显示默认内容
+  window.addEventListener("load", function () {
+    document.getElementById("randomBtn").click();
+  });
+</script>
+{% endif %} {% endblock %}
