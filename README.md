@@ -22,6 +22,7 @@
 ## 核心功能
 
 ### 平台功能
+
 - **二手交易市场** - 发布、浏览、搜索二手商品，支持图片上传
 - **失物招领** - 发布丢失/拾取物品信息，状态跟踪管理
 - **站内消息系统** - 用户间私信沟通，关联具体商品/失物帖子
@@ -29,6 +30,7 @@
 - **随机浏览** - 发现更多内容，增加用户粘性
 
 ### 用户功能
+
 - 用户注册/登录（学号认证）
 - 个人中心
 - 我的发布（查看自己发布的所有内容）
@@ -44,34 +46,38 @@
 <div align="center">
   <img src="pic/loginPage.png" width="37%">
 </div>
-**2. 注册页面**：
 
+**2. 注册页面**：
 
 <div align="center">
   <img src="pic/registerPage.png" width="37%">
 </div>
+
 **3. 首页主页面**：
 
 <div align="center">
   <img src="pic/mainPage.png" width="80%">
 </div>
+
 **4. 我的发布**：
 
 <div align="center">
   <img src="pic/publishPage.png" width="80%">
 </div>
+
 **5. 发布二手商品**：
 
 <div align="center">
   <img src="pic/publish_secondhandPage.png" width="80%">
 </div>
+
 **6. 发布失物招领**：
 
 <div align="center">
   <img src="pic/publish_lostPage.png" width="80%">
 </div>
 
------
+---
 
 ## 技术栈
 
@@ -84,7 +90,7 @@
 | 密码加密 | Flask-Bcrypt        |
 | 跨域处理 | Flask-CORS          |
 
------
+---
 
 ## 项目结构
 
@@ -124,7 +130,7 @@ campus-life-circle/
 └── README.md                   # 本文件
 ```
 
-------
+---
 
 ## 快速开始
 
@@ -155,6 +161,7 @@ venv\Scripts\activate     # Windows
 ```
 
 **或使用 conda:**
+
 ```bash
 conda create -n campus python=3.10
 conda activate campus
@@ -190,7 +197,7 @@ python frontend_app.py
 
 在浏览器中打开: `http://127.0.0.1:5001`
 
--------
+---
 
 ## 许可证
 
