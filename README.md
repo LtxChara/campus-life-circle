@@ -4,13 +4,24 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-一个面向高校学生的综合性校园服务平台，采用前后端分离架构，提供**二手交易**和**失物招领**两大核心功能，并支持**站内消息**系统便于用户之间进行沟通联系。
+> 一个基于 Python 开发的面向高校学生的综合性校园服务平台，采用前后端分离架构，提供**二手交易**和**失物招领**两大核心功能，并支持**站内消息**系统便于用户之间进行沟通联系。
 
-![校园生活圈首页](docs/homepage.png)
+---
 
-## 功能特性
+## 目录
 
-### 核心功能
+- [核心功能](#核心功能)
+- [截图预览](#截图预览)
+- [技术栈](#技术栈)
+- [项目结构](#项目结构)
+- [快速开始](#快速开始)
+- [许可证](#许可证)
+
+---
+
+## 核心功能
+
+### 平台功能
 - **二手交易市场** - 发布、浏览、搜索二手商品，支持图片上传
 - **失物招领** - 发布丢失/拾取物品信息，状态跟踪管理
 - **站内消息系统** - 用户间私信沟通，关联具体商品/失物帖子
@@ -23,6 +34,43 @@
 - 我的发布（查看自己发布的所有内容）
 - 未读消息实时提醒
 - 商品/失物状态管理
+
+---
+
+## 截图预览
+
+**1. 登录 & 注册页面**：
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+  <img src="pic/loginPage.png" width="35%">
+  <img src="pic/registerPage.png" width="35%">
+</div>
+
+**2. 首页主页面**：
+
+<div align="center">
+  <img src="pic/mainPage.png" width="80%">
+</div>
+
+**3. 我的发布**：
+
+<div align="center">
+  <img src="pic/publishPage.png" width="80%">
+</div>
+
+**4. 发布二手商品**：
+
+<div align="center">
+  <img src="pic/publish_secondhandPage.png" width="80%">
+</div>
+
+**5. 发布失物招领**：
+
+<div align="center">
+  <img src="pic/publish_lostPage.png" width="80%">
+</div>
+
+-----
 
 ## 技术栈
 
@@ -136,3 +184,29 @@ python frontend_app.py
 ### 7. 访问应用
 
 在浏览器中打开: `http://127.0.0.1:5001`
+
+## 许可证
+
+本项目基于 [MIT License](LICENSE) 开源，你可以自由学习、修改和分发。
+
+```
+MIT License
+
+Copyright (c) 2026 Tianxiang Li
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+```
+
+---
+
+> 如果你在学习过程中有任何问题，欢迎提交 [Issue](https://github.com/[YourUsername]/MusicPlayer4/issues) 或 [Pull Request](https://github.com/[YourUsername]/MusicPlayer4/pulls)。祝你学习愉快！
+>
+> ⭐ 如果这个项目对你有帮助，欢迎 Star 支持！
