@@ -39,35 +39,33 @@
 
 ## 截图预览
 
-**1. 登录 & 注册页面**：
+**1. 登录页面**：
 
 <div align="center">
   <img src="pic/loginPage.png" width="37%">
 </div>
+**2. 注册页面**：
+
 
 <div align="center">
   <img src="pic/registerPage.png" width="37%">
 </div>
-
-**2. 首页主页面**：
+**3. 首页主页面**：
 
 <div align="center">
   <img src="pic/mainPage.png" width="80%">
 </div>
-
-**3. 我的发布**：
+**4. 我的发布**：
 
 <div align="center">
   <img src="pic/publishPage.png" width="80%">
 </div>
-
-**4. 发布二手商品**：
+**5. 发布二手商品**：
 
 <div align="center">
   <img src="pic/publish_secondhandPage.png" width="80%">
 </div>
-
-**5. 发布失物招领**：
+**6. 发布失物招领**：
 
 <div align="center">
   <img src="pic/publish_lostPage.png" width="80%">
