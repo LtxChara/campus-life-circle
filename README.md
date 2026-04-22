@@ -41,9 +41,12 @@
 
 **1. 登录 & 注册页面**：
 
-<div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-  <img src="pic/loginPage.png" width="35%">
-  <img src="pic/registerPage.png" width="35%">
+<div align="center">
+  <img src="pic/loginPage.png" width="37%">
+</div>
+
+<div align="center">
+  <img src="pic/registerPage.png" width="37%">
 </div>
 
 **2. 首页主页面**：
@@ -83,6 +86,8 @@
 | 密码加密 | Flask-Bcrypt        |
 | 跨域处理 | Flask-CORS          |
 
+-----
+
 ## 项目结构
 
 ```
@@ -120,6 +125,8 @@ campus-life-circle/
 ├── requirements.txt            # Python依赖
 └── README.md                   # 本文件
 ```
+
+------
 
 ## 快速开始
 
@@ -184,6 +191,8 @@ python frontend_app.py
 ### 7. 访问应用
 
 在浏览器中打开: `http://127.0.0.1:5001`
+
+-------
 
 ## 许可证
 
